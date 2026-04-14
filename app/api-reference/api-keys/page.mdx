@@ -1,0 +1,59 @@
+# API keys
+
+Manage the keys used to authenticate calls to `api_key` functions.
+
+## List keys
+
+<Endpoint method="GET" path="/api/keys" auth="clerk">
+Returns every API key owned by the authenticated user. Only metadata is returned — the full secret is never exposed after creation.
+</Endpoint>
+
+### Response
+
+```json
+[
+  {
+    "id": "key_01HW...",
+    "name": "production-webhooks",
+    "prefix": "nvk_abcdefgh",
+    "last_used_at": "2026-04-14T09:00:00Z",
+    "created_at": "2026-04-01T00:00:00Z"
+  }
+]
+```
+
+## Create a key
+
+<Endpoint method="POST" path="/api/keys" auth="clerk">
+Creates a new API key. The full key value is returned <strong>once</strong> — store it immediately.
+</Endpoint>
+
+### Request
+
+<ParamTable params={[
+  { name: "name", type: "string", required: true, description: "A descriptive name. Shown in the dashboard." }
+]} />
+
+### Response
+
+```json
+{
+  "key": {
+    "id": "key_01HW...",
+    "name": "production-webhooks",
+    "prefix": "nvk_abcdefgh",
+    "created_at": "2026-04-14T10:00:00Z"
+  },
+  "secret": "nvk_abcdefghij1234567890..."
+}
+```
+
+The `secret` field is present **only** in this response. Subsequent `GET /api/keys` calls will never return it.
+
+## Delete a key
+
+<Endpoint method="DELETE" path="/api/keys/:id" auth="clerk">
+Revokes an API key immediately. Returns <code>204 No Content</code>.
+</Endpoint>
+
+Revocation takes effect instantly. Any function call using the deleted key after this point receives `401`.

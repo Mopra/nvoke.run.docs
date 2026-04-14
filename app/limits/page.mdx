@@ -1,0 +1,30 @@
+# Limits
+
+nvoke.run enforces a small set of hard limits on every function and invocation. They exist so the platform can run many functions safely on shared infrastructure.
+
+## Execution
+
+| Limit | Value | What happens when exceeded |
+| --- | --- | --- |
+| Wall-clock timeout | **30 seconds** | Invocation status becomes `timeout`, caller receives `504 Gateway Timeout` |
+| Memory | **128 MB** | Worker is terminated, invocation status becomes `error` |
+
+## Invocation storage
+
+| Limit | Value |
+| --- | --- |
+| Response body preview captured per invocation | **4 KB** |
+
+The full response is still returned to the caller — only the stored preview is truncated.
+
+## Functions
+
+| Limit | Value |
+| --- | --- |
+| Allowed HTTP methods per function | any subset of `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS` |
+| Slug format | lowercase alphanumeric + dashes |
+| Slug uniqueness | globally unique across the platform |
+
+## What isn't documented here
+
+Rate limits and per-account quotas are subject to change; check your dashboard or contact support if you're hitting unexpected throttling.

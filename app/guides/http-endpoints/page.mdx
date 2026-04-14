@@ -1,0 +1,76 @@
+# HTTP endpoints
+
+Every function is reachable at a stable URL the moment you save it:
+
+```text
+https://nvoke.run/f/<slug>
+```
+
+This page covers everything you can configure about that URL.
+
+## Slugs
+
+The slug is the human-readable part of the URL. Rules:
+
+- lowercase
+- alphanumeric characters and dashes only
+- globally unique across the platform
+
+If a slug is taken, the editor will tell you. Pick another. Slugs can be changed later — but the old URL stops working immediately, so treat renames carefully if anything is calling the endpoint in production.
+
+## Access modes
+
+Choose one per function:
+
+### `public`
+
+Anyone with the URL can call the endpoint. No authentication. Use this for:
+
+- webhooks from providers that can't send auth headers
+- public demos
+- read-only endpoints that return non-sensitive data
+
+### `api_key`
+
+The caller must send a header with a valid API key:
+
+```http
+Authorization: Bearer nvk_xxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+The key must belong to the same user who owns the function. Requests without a valid key get `401`.
+
+Switch access modes at any time — the change takes effect immediately.
+
+## Allowed HTTP methods
+
+Each function declares the set of methods it accepts. Pick any subset of:
+
+```text
+GET  POST  PUT  PATCH  DELETE  HEAD  OPTIONS
+```
+
+Requests using a method outside the allowed set get a `405 Method Not Allowed` without ever invoking your function. This keeps unrelated traffic from showing up in your invocation history.
+
+## Enabling and disabling
+
+Every function has an `enabled` boolean. When disabled:
+
+- the slug resolves to `404` for incoming HTTP requests
+- the function still exists in your dashboard
+- editor test runs still work (for debugging)
+
+Disable a function instead of deleting it when you want to turn off traffic temporarily — for maintenance, to stop a runaway webhook, or to take something offline without losing its history.
+
+## Response status codes (from the edge)
+
+Before your function is even invoked, nvoke can respond with:
+
+| Status | Reason |
+| --- | --- |
+| `404` | unknown slug, or function is disabled |
+| `401` | `api_key` mode, missing or invalid key |
+| `403` | key is valid but belongs to a different user |
+| `405` | method not in the allowed set |
+
+Once the request passes those checks, your function runs and its return value shapes the final response.

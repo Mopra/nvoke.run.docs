@@ -1,0 +1,54 @@
+# Overview
+
+## Base URL
+
+```text
+https://nvoke.run
+```
+
+All management endpoints live under `/api/*`. Public function endpoints live under `/f/*`.
+
+## Authentication
+
+The management API uses **Clerk session tokens**. Send them in the `Authorization` header:
+
+```http
+Authorization: Bearer <clerk-session-token>
+```
+
+In practice, you won't hand-craft Clerk tokens — you'll call these endpoints from a frontend that already has an authenticated Clerk session. The backend verifies the token on every request, extracts the user, and scopes everything to that user's resources.
+
+Public function endpoints (`/f/:slug`) use a separate scheme — see [HTTP invoke](/api-reference/http-invoke).
+
+## Content type
+
+All request and response bodies are JSON.
+
+```http
+Content-Type: application/json
+```
+
+## Errors
+
+Error responses share a shape:
+
+```json
+{
+  "error": "short machine-readable code",
+  "message": "human-readable explanation"
+}
+```
+
+| Status | Meaning |
+| --- | --- |
+| `400` | Request body failed validation |
+| `401` | Missing or invalid authentication |
+| `403` | Authenticated but not allowed to access this resource |
+| `404` | Resource does not exist (or is hidden from you) |
+| `405` | Method not allowed on this route |
+| `500` | Unexpected server error |
+| `504` | Function execution exceeded the 30-second timeout |
+
+## Scoping
+
+Every resource is implicitly scoped to the authenticated user. You never specify a user ID — the backend derives it from your session. You cannot read or mutate another user's functions, invocations, or keys.

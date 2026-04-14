@@ -1,0 +1,61 @@
+# HTTP invoke
+
+The public endpoint surface every function is deployed to.
+
+## Invoke a function
+
+<Endpoint
+  method={["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]}
+  path="/f/:slug"
+  auth="public"
+>
+  Executes the function whose slug matches <code>:slug</code>. The actual auth
+  required depends on the function's access mode — see below.
+</Endpoint>
+
+### Authentication
+
+Depends on the function's configured access mode:
+
+- **`public`** — no authentication. Anyone with the URL can call it.
+- **`api_key`** — the caller must send:
+
+  ```http
+  Authorization: Bearer nvk_xxxxxxxxxxxxxxxxxxxxxxxx
+  ```
+
+  The key must belong to the same user who owns the function.
+
+### Request
+
+Send whatever method your function's **allowed methods** list includes. Send a JSON body if your function expects one:
+
+```bash
+curl https://nvoke.run/f/hello-world \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"name":"world"}'
+```
+
+Inside the function, the body is parsed for you — `req.body` will be the decoded object when the request sends JSON.
+
+### Response
+
+The response comes directly from your function's return value (see [Writing functions](/guides/writing-functions) for the full rules).
+
+### Edge status codes
+
+Before your function runs, the edge can respond with:
+
+| Status | Reason |
+| --- | --- |
+| `404` | slug is unknown, or function is disabled |
+| `401` | `api_key` mode, missing or invalid `Authorization` |
+| `403` | valid key, but belongs to a different user |
+| `405` | method not in the function's allowed set |
+| `504` | function execution exceeded 30 seconds |
+| `500` | function threw an uncaught error |
+
+### Invocation recording
+
+Every successful dispatch (regardless of your function's outcome) is recorded as an invocation with `trigger_kind: "http"`, including the request method, path, headers, and the response. Edge-level rejections (`404`, `401`, `403`, `405`) are **not** recorded — they don't count as invocations.

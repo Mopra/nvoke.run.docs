@@ -1,0 +1,103 @@
+# Functions
+
+CRUD for the functions you own, plus the editor-run invoke endpoint.
+
+## List functions
+
+<Endpoint method="GET" path="/api/functions" auth="clerk">
+Returns every function owned by the authenticated user.
+</Endpoint>
+
+### Response
+
+```json
+[
+  {
+    "id": "f_01HW...",
+    "name": "hello-world",
+    "slug": "hello-world",
+    "access_mode": "public",
+    "enabled": true,
+    "methods": ["GET", "POST"],
+    "created_at": "2026-04-14T10:00:00Z",
+    "updated_at": "2026-04-14T10:15:00Z"
+  }
+]
+```
+
+## Create a function
+
+<Endpoint method="POST" path="/api/functions" auth="clerk">
+Creates a new function owned by the authenticated user.
+</Endpoint>
+
+### Request
+
+<ParamTable params={[
+  { name: "name", type: "string", required: true, description: "Human-readable name for your own reference." },
+  { name: "code", type: "string", required: true, description: "The JavaScript source code of the function." },
+  { name: "slug", type: "string", required: false, description: "URL-safe identifier. Generated if omitted." },
+  { name: "access_mode", type: '"public" | "api_key"', required: false, description: "Defaults to \"api_key\"." },
+  { name: "enabled", type: "boolean", required: false, description: "Defaults to true." },
+  { name: "methods", type: "string[]", required: false, description: "Allowed HTTP methods. Defaults to [\"POST\"]." }
+]} />
+
+### Response
+
+`201 Created` with the full function record.
+
+## Get a function
+
+<Endpoint method="GET" path="/api/functions/:id" auth="clerk">
+Returns a single function by ID.
+</Endpoint>
+
+Returns `404` if the ID is unknown or belongs to another user.
+
+## Update a function
+
+<Endpoint method="PUT" path="/api/functions/:id" auth="clerk">
+Updates one or more fields on an existing function.
+</Endpoint>
+
+### Request
+
+Any subset of the fields accepted by the create endpoint. Omitted fields keep their current values.
+
+### Response
+
+The updated function record.
+
+## Delete a function
+
+<Endpoint method="DELETE" path="/api/functions/:id" auth="clerk">
+Permanently deletes a function and returns <code>204 No Content</code>.
+</Endpoint>
+
+Deletion does not cascade-delete historical invocation records — they remain for audit purposes but show as "orphaned" in the UI.
+
+## Run a function from the editor
+
+<Endpoint method="POST" path="/api/functions/:id/invoke" auth="clerk">
+Executes the function with a synthetic request built from the provided body. Creates an invocation record with <code>trigger_kind: "editor"</code>.
+</Endpoint>
+
+### Request
+
+<ParamTable params={[
+  { name: "method", type: "string", required: false, description: "HTTP method to simulate. Defaults to \"POST\"." },
+  { name: "headers", type: "Record<string, string>", required: false, description: "Request headers to pass to the function." },
+  { name: "body", type: "unknown", required: false, description: "Request body to pass to the function." }
+]} />
+
+### Response
+
+```json
+{
+  "invocation_id": "inv_01HW...",
+  "status": "success",
+  "duration_ms": 12,
+  "response": { "status": 200, "headers": {}, "body": { "ok": true } },
+  "logs": ["hello from nvoke"]
+}
+```

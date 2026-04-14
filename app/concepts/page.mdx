@@ -1,0 +1,81 @@
+# Concepts
+
+A short glossary of every domain term you'll encounter in the product and the API.
+
+## Function
+
+A piece of JavaScript code that runs when its HTTP endpoint is invoked. Functions are stored in the database as source code and executed in a sandboxed worker for each call. Each function belongs to exactly one user.
+
+## Slug
+
+A URL-safe identifier that determines the public path of your function:
+
+```text
+https://nvoke.run/f/<slug>
+```
+
+Slugs must be lowercase, alphanumeric, and may contain dashes. They're unique across the platform — if the slug you want is taken, pick another.
+
+## Access mode
+
+Controls who can invoke the function:
+
+- **`public`** — anyone with the URL can call it. No authentication required.
+- **`api_key`** — the caller must send an `Authorization: Bearer nvk_...` header matching a valid key owned by the function's owner.
+
+Access mode is set per function and can be changed at any time.
+
+## Allowed HTTP methods
+
+The set of HTTP verbs the function accepts. Any subset of:
+
+```text
+GET  POST  PUT  PATCH  DELETE  HEAD  OPTIONS
+```
+
+Requests using a method outside the allowed set get a `405 Method Not Allowed` response. Your function is never invoked for disallowed methods.
+
+## Enabled
+
+A boolean flag. Disabled functions return `404` for every incoming request, even when the slug matches. Use this to turn off a function without deleting it.
+
+## Invocation
+
+One execution of a function. Every call — whether from the editor, a webhook, or a manual `curl` — creates an invocation record containing:
+
+- the request (method, path, headers, body)
+- the response (status, headers, body preview)
+- logs captured via `ctx.log()`
+- status (`success`, `error`, or `timeout`)
+- duration in milliseconds
+
+Invocations are the primary tool for debugging and observability.
+
+## Trigger kind
+
+How an invocation was started:
+
+- **`editor`** — you clicked **Run** in the function editor
+- **`http`** — a real HTTP request hit `/f/<slug>`
+
+Shown on each invocation so you can tell real traffic from test runs.
+
+## API key
+
+A long-lived credential used to authenticate programmatic calls to `api_key` functions. Keys are prefixed `nvk_` and displayed **only once** at creation time — store them somewhere safe. You can revoke a key at any time from **Settings → API keys**.
+
+Keys are stored hashed in the database. nvoke.run cannot recover a key for you if you lose it; rotate instead.
+
+## Logs
+
+Lines captured via `ctx.log(...)` during function execution. They're stored as part of the invocation record and visible in the UI for every run. Treat them as ephemeral debugging output, not durable telemetry.
+
+## Execution limits
+
+Every function runs under fixed resource ceilings:
+
+- **30-second** wall-clock timeout (responds with `504` if exceeded)
+- **128 MB** memory cap
+- **4 KB** response body preview stored per invocation
+
+See [Limits](/limits) for the full list.

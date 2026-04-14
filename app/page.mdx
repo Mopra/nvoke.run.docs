@@ -1,0 +1,47 @@
+# nvoke.run
+
+**nvoke.run** is a platform for writing small JavaScript functions and exposing them as HTTP endpoints. Write your code in the browser, give it a slug, and call it from anywhere — no servers, no cold-start config, no build pipeline.
+
+Every function you create gets a stable URL:
+
+```text
+https://nvoke.run/f/<your-slug>
+```
+
+That URL is a real HTTP endpoint. Send it a request with any allowed method, get back whatever your function returns.
+
+## The mental model
+
+A function in nvoke is a handler. It receives a normalized request and returns a response:
+
+```js
+export default async function (req, ctx) {
+  ctx.log("hello from nvoke");
+  return { message: `you sent ${req.method} ${req.path}` };
+}
+```
+
+- `req` — the incoming HTTP request (method, path, query, headers, body)
+- `ctx` — utilities like `ctx.log()` for capturing output into the invocation record
+- the **return value** becomes the response body (JSON by default)
+
+Each call is an **invocation**, stored with its request, response, logs, and duration so you can inspect it later.
+
+## When nvoke is a good fit
+
+- webhooks (Stripe, GitHub, Linear, whatever)
+- small internal APIs or glue endpoints
+- experiments you want on a real URL in under a minute
+- "one function" microservices you don't want to run a server for
+
+## When it isn't
+
+- long-running jobs (functions time out at 30 seconds)
+- large responses (body preview is capped at 4 KB)
+- anything that needs persistent in-process state between calls
+
+## Where to go next
+
+- [Getting Started](/getting-started) — deploy your first function in ~2 minutes
+- [Concepts](/concepts) — slugs, access modes, invocations, limits
+- [API Reference](/api-reference/overview) — the management API

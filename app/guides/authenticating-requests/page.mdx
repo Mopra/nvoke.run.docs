@@ -1,0 +1,58 @@
+# Authenticating requests
+
+For functions with access mode `api_key`, callers must authenticate with an nvoke API key.
+
+## Creating a key
+
+1. Open **Settings → API keys**.
+2. Click **New key** and give it a descriptive name (e.g. `production-webhooks`).
+3. Copy the key **immediately**. The full value is shown exactly once — after you close the dialog, only the prefix is visible.
+
+Keys look like this:
+
+```text
+nvk_abcdefghij1234567890...
+```
+
+The `nvk_` prefix is how the platform identifies it as an nvoke key. Store the full value somewhere safe (a secret manager, `.env` file, CI secret — anywhere that isn't your clipboard).
+
+## Using a key
+
+Send the key in the `Authorization` header as a bearer token:
+
+```bash
+curl https://nvoke.run/f/hello-world \
+  -H "Authorization: Bearer nvk_xxxxxxxxxxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"world"}'
+```
+
+The same header format works for every `api_key` function on your account — one key can invoke any function that belongs to the same user.
+
+## What gets checked
+
+On every request to an `api_key` function:
+
+1. Header present? If not → `401`.
+2. Value starts with `nvk_`? If not → `401`.
+3. Hash matches a stored key? If not → `401`.
+4. Key's owner matches function's owner? If not → `403`.
+
+Successful authentication also updates the key's `last_used_at` timestamp so you can spot unused keys.
+
+## Rotating and revoking
+
+Keys cannot be recovered. If a key is lost or leaked:
+
+1. Create a new key.
+2. Update your callers to use it.
+3. Delete the old key from **Settings → API keys**.
+
+Deleted keys are rejected instantly — there is no grace period.
+
+## Operational advice
+
+- **One key per caller.** Mint separate keys for each service that calls your functions. Revocation is then surgical.
+- **Rotate on a schedule.** Even without a known leak, rotate keys periodically.
+- **Never commit keys.** Treat them like passwords.
+- **Watch `last_used_at`.** Keys with no recent use are good candidates for deletion.

@@ -1,0 +1,83 @@
+# Writing functions
+
+Every function in nvoke.run is a default-exported async function that takes two arguments: the request and a context object.
+
+```js
+export default async function (req, ctx) {
+  return { ok: true };
+}
+```
+
+## The `req` object
+
+`req` is a normalized HTTP request. Regardless of how the function was triggered (editor, public URL, API key), you get the same shape:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `req.method` | `string` | Upper-cased HTTP method, e.g. `"POST"` |
+| `req.path` | `string` | Request path as received, e.g. `"/f/hello-world"` |
+| `req.query` | `Record<string, string>` | Parsed query string |
+| `req.headers` | `Record<string, string>` | Lower-cased header map |
+| `req.body` | `unknown` | Parsed JSON if the request sent JSON; otherwise the raw string |
+
+## The `ctx` object
+
+`ctx` provides utilities:
+
+- **`ctx.log(...args)`** — captures a log line into the invocation record. Accepts any number of arguments and stringifies them like `console.log`.
+
+That's it for v1. Don't rely on undocumented fields; they may disappear.
+
+## Return values
+
+Whatever you return becomes the response body. nvoke normalizes it:
+
+- **Object or array** → serialized as JSON with `Content-Type: application/json`
+- **String** → sent as-is with `Content-Type: text/plain`
+- **`undefined` / no return** → empty `204 No Content`
+
+For full control over status and headers, return an object with the special shape:
+
+```js
+return {
+  status: 201,
+  headers: { "x-custom": "yes" },
+  body: { id: "abc123" },
+};
+```
+
+## Errors
+
+Throwing anywhere inside the handler marks the invocation as `error` and returns a `500` to the caller. The error's `message` is captured in the invocation record as `error_message`. Nothing else from the error is exposed to the caller.
+
+```js
+export default async function (req, ctx) {
+  if (!req.body?.email) {
+    throw new Error("missing email");
+  }
+  // ...
+}
+```
+
+Prefer explicit error responses for expected failure cases:
+
+```js
+if (!req.body?.email) {
+  return { status: 400, body: { error: "missing email" } };
+}
+```
+
+## Logging
+
+Use `ctx.log` liberally — it's the main way to debug what happened inside an invocation:
+
+```js
+export default async function (req, ctx) {
+  ctx.log("incoming", req.method, req.path);
+  const result = await doWork(req.body);
+  ctx.log("result", result);
+  return result;
+}
+```
+
+Logs are stored on the invocation record and shown in the UI. They are **not** piped to a long-term log store — treat them as ephemeral debugging output.

@@ -1,0 +1,58 @@
+# Testing and debugging
+
+Two feedback loops are available when you're iterating on a function: the **editor run** and the **invocation history**.
+
+## Editor runs
+
+Inside a function's editor page, the **Run** button sends a test request to your function with whatever body and headers you've specified in the run panel. The response, logs, and duration appear immediately.
+
+Editor runs:
+
+- bypass slug routing and access-mode checks (they hit the function directly)
+- still enforce the full 30-second timeout and 128 MB memory cap
+- still create an invocation record, marked with `trigger_kind: "editor"`
+- ignore the `enabled` flag — you can test a disabled function
+
+This is the fastest loop for code changes: edit, Run, read the logs, repeat.
+
+## Invocation history
+
+Every call to your function — editor, public URL, webhook, API key — creates an invocation record. Find them at **Runs** in the sidebar.
+
+Each invocation shows:
+
+- **Status** — `success`, `error`, or `timeout`
+- **Duration** — wall-clock milliseconds
+- **Trigger kind** — `editor` or `http`
+- **Request** — method, path, headers, body
+- **Response** — status, headers, body preview (capped at 4 KB)
+- **Logs** — every `ctx.log()` line, in order
+- **Error message** — present when status is `error`
+
+Filter by status to find failures fast, or click into a specific invocation for the full record.
+
+## Debugging recipes
+
+### "It worked in the editor but fails over HTTP"
+
+The most common cause is access-mode or method mismatch. Check:
+
+- Is `enabled` on?
+- Is the request method in the allowed list?
+- For `api_key` functions, is the `Authorization` header being sent?
+
+The edge returns `404`, `401`, `403`, or `405` before your function runs — no invocation record is created. If you see no new invocation appearing, the request is being rejected before it reaches you.
+
+### "My function times out"
+
+Check the invocation's `duration_ms`. If it's near 30000, you're hitting the wall-clock limit. Common causes:
+
+- calling a slow external API without a timeout of your own
+- an infinite loop in a code path
+- awaiting a promise that never resolves
+
+Add `ctx.log()` calls around suspected slow sections and re-run.
+
+### "Logs are missing"
+
+Logs only appear if `ctx.log()` was actually called before the function returned or threw. `console.log` is **not** captured — use `ctx.log` for anything you want to see in the invocation record.

@@ -1,0 +1,75 @@
+# Invocations
+
+Read-only access to the invocation history.
+
+## List all invocations
+
+<Endpoint method="GET" path="/api/invocations" auth="clerk">
+Returns invocations across all of the authenticated user's functions, newest first.
+</Endpoint>
+
+### Query parameters
+
+<ParamTable params={[
+  { name: "status", type: '"success" | "error" | "timeout"', required: false, description: "Filter by invocation status." },
+  { name: "limit", type: "number", required: false, description: "Maximum number of records to return. Defaults to 50." }
+]} />
+
+### Response
+
+```json
+[
+  {
+    "id": "inv_01HW...",
+    "function_id": "f_01HW...",
+    "status": "success",
+    "duration_ms": 12,
+    "trigger_kind": "http",
+    "request_method": "POST",
+    "request_path": "/f/hello-world",
+    "response_status": 200,
+    "started_at": "2026-04-14T10:15:00Z",
+    "completed_at": "2026-04-14T10:15:00Z"
+  }
+]
+```
+
+## List invocations for a function
+
+<Endpoint method="GET" path="/api/functions/:id/invocations" auth="clerk">
+Same as above, but scoped to a single function.
+</Endpoint>
+
+Accepts the same query parameters as `GET /api/invocations`.
+
+## Get a single invocation
+
+<Endpoint method="GET" path="/api/invocations/:id" auth="clerk">
+Returns the full detail view of one invocation, including captured request, response, logs, and error message.
+</Endpoint>
+
+### Response
+
+```json
+{
+  "id": "inv_01HW...",
+  "function_id": "f_01HW...",
+  "source": "api",
+  "trigger_kind": "http",
+  "status": "success",
+  "duration_ms": 12,
+  "started_at": "2026-04-14T10:15:00Z",
+  "completed_at": "2026-04-14T10:15:00Z",
+  "request_method": "POST",
+  "request_path": "/f/hello-world",
+  "request_headers": { "content-type": "application/json" },
+  "input": { "name": "world" },
+  "response_status": 200,
+  "response_headers": { "content-type": "application/json" },
+  "response_body_preview": "{\"message\":\"hello world\"}",
+  "logs": ["hello from nvoke"],
+  "error_message": null
+}
+```
+
+The `response_body_preview` is capped at 4 KB. Bodies larger than that are truncated in storage — the caller of the function still receives the full body.

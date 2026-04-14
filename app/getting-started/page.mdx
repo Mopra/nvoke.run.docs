@@ -1,0 +1,65 @@
+# Getting Started
+
+This walkthrough takes you from signup to a live, callable HTTP endpoint in about two minutes.
+
+## 1. Sign in
+
+Open [nvoke.run](https://nvoke.run) and sign in. Authentication is handled by Clerk — you can use email, Google, or any provider your workspace has enabled.
+
+## 2. Create a function
+
+From the dashboard, go to **Functions** and click **New function**. You'll land in the editor with a starter template:
+
+```js
+export default async function (req, ctx) {
+  ctx.log("hello from nvoke");
+  return { message: "it works" };
+}
+```
+
+Give it a **name** (for your own reference) and a **slug** (the URL-safe identifier that becomes the public path). Slugs must be lowercase, alphanumeric, and may contain dashes. Example: `stripe-webhook`, `hello-world`, `notify-slack`.
+
+## 3. Configure the endpoint
+
+Before your function is callable, configure:
+
+- **Access mode** — `public` (anyone with the URL can call it) or `api_key` (caller must send a valid API key).
+- **Allowed HTTP methods** — pick any subset of `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`. Requests with a disallowed method return `405`.
+- **Enabled** — must be on. Disabled endpoints return `404` even if the slug resolves.
+
+## 4. Test from the editor
+
+Hit **Run**. The editor sends a test request to your function and shows you the response, logs, and duration. Iterate until it does what you want.
+
+## 5. Call it from outside
+
+Your public URL is:
+
+```text
+https://nvoke.run/f/<your-slug>
+```
+
+For a public function:
+
+```bash
+curl https://nvoke.run/f/hello-world
+```
+
+For an `api_key` function, mint a key at **Settings → API keys** and pass it in the `Authorization` header:
+
+```bash
+curl https://nvoke.run/f/hello-world \
+  -H "Authorization: Bearer nvk_xxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+The response body and status code come directly from whatever your function returns.
+
+## 6. Inspect invocations
+
+Every call — from the editor, from `curl`, from a webhook provider — is recorded as an **invocation**. Go to **Runs** to browse them, filter by status, and click into any one to see the full request, response, logs, and timing.
+
+## Next steps
+
+- [Writing functions](/guides/writing-functions) — the `req` and `ctx` API in full
+- [Authenticating requests](/guides/authenticating-requests) — API key management
+- [Concepts](/concepts) — the vocabulary used throughout the platform
