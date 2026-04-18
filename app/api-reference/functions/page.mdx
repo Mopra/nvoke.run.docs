@@ -11,18 +11,20 @@ Returns every function owned by the authenticated user.
 ### Response
 
 ```json
-[
-  {
-    "id": "f_01HW...",
-    "name": "hello-world",
-    "slug": "hello-world",
-    "access_mode": "public",
-    "enabled": true,
-    "methods": ["GET", "POST"],
-    "created_at": "2026-04-14T10:00:00Z",
-    "updated_at": "2026-04-14T10:15:00Z"
-  }
-]
+{
+  "functions": [
+    {
+      "id": "3f8a2a6e-8a7a-4e2e-9b6a-1f2c0a8b7d4e",
+      "name": "hello-world",
+      "slug": "hello-world",
+      "access_mode": "public",
+      "enabled": true,
+      "methods": ["GET", "POST"],
+      "created_at": "2026-04-14T10:00:00Z",
+      "updated_at": "2026-04-14T10:15:00Z"
+    }
+  ]
+}
 ```
 
 ## Create a function
@@ -78,23 +80,23 @@ Deletion does not cascade-delete historical invocation records — they remain f
 
 ## Run a function from the editor
 
-<Endpoint method="POST" path="/api/functions/:id/invoke" auth="clerk">
-Executes the function with a synthetic request built from the provided body. Creates an invocation record with <code>trigger_kind: "editor"</code>.
+<Endpoint
+  method={["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]}
+  path="/api/functions/:id/invoke"
+  auth="clerk"
+>
+Executes the function with the exact request you send — the outer HTTP method, headers, and body are forwarded to your function. Creates an invocation record with <code>trigger_kind: "editor"</code>.
 </Endpoint>
 
 ### Request
 
-<ParamTable params={[
-  { name: "method", type: "string", required: false, description: "HTTP method to simulate. Defaults to \"POST\"." },
-  { name: "headers", type: "Record<string, string>", required: false, description: "Request headers to pass to the function." },
-  { name: "body", type: "unknown", required: false, description: "Request body to pass to the function." }
-]} />
+Send the request you want your function to receive. The request method, headers, and body are what your function sees as `req.method`, `req.headers`, and `req.body`.
 
 ### Response
 
 ```json
 {
-  "invocation_id": "inv_01HW...",
+  "invocation_id": "a1d4d8d2-9f3b-4a3d-bf1a-2b7c1e0d7c3a",
   "status": "success",
   "duration_ms": 12,
   "response": { "status": 200, "headers": {}, "body": { "ok": true } },

@@ -4,7 +4,7 @@ This walkthrough takes you from signup to a live, callable HTTP endpoint in abou
 
 ## 1. Sign in
 
-Open [nvoke.run](https://nvoke.run) and sign in. Authentication is handled by Clerk — you can use email, Google, or any provider your workspace has enabled.
+Open [app.nvoke.run](https://app.nvoke.run) and sign in. Authentication is handled by Clerk — you can use email, Google, or any provider your workspace has enabled.
 
 ## 2. Create a function
 
@@ -36,19 +36,19 @@ Hit **Run**. The editor sends a test request to your function and shows you the 
 Your public URL is:
 
 ```text
-https://nvoke.run/f/<your-slug>
+https://api.nvoke.run/f/<your-slug>
 ```
 
 For a public function:
 
 ```bash
-curl https://nvoke.run/f/hello-world
+curl https://api.nvoke.run/f/hello-world
 ```
 
 For an `api_key` function, mint a key at **Settings → API keys** and pass it in the `Authorization` header:
 
 ```bash
-curl https://nvoke.run/f/hello-world \
+curl https://api.nvoke.run/f/hello-world \
   -H "Authorization: Bearer nvk_xxxxxxxxxxxxxxxxxxxxxxxx"
 ```
 

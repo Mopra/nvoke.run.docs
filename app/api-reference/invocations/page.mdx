@@ -18,21 +18,27 @@ Returns invocations across all of the authenticated user's functions, newest fir
 ### Response
 
 ```json
-[
-  {
-    "id": "inv_01HW...",
-    "function_id": "f_01HW...",
-    "status": "success",
-    "duration_ms": 12,
-    "trigger_kind": "http",
-    "request_method": "POST",
-    "request_path": "/f/hello-world",
-    "response_status": 200,
-    "started_at": "2026-04-14T10:15:00Z",
-    "completed_at": "2026-04-14T10:15:00Z"
-  }
-]
+{
+  "invocations": [
+    {
+      "id": "a1d4d8d2-9f3b-4a3d-bf1a-2b7c1e0d7c3a",
+      "function_id": "3f8a2a6e-8a7a-4e2e-9b6a-1f2c0a8b7d4e",
+      "function_name": "hello-world",
+      "source": "api",
+      "status": "success",
+      "duration_ms": 12,
+      "trigger_kind": "http",
+      "request_method": "POST",
+      "request_path": "/f/hello-world",
+      "response_status": 200,
+      "started_at": "2026-04-14T10:15:00Z",
+      "completed_at": "2026-04-14T10:15:00Z"
+    }
+  ]
+}
 ```
+
+Invocations are retained for **1 day** and then pruned.
 
 ## List invocations for a function
 
@@ -52,23 +58,25 @@ Returns the full detail view of one invocation, including captured request, resp
 
 ```json
 {
-  "id": "inv_01HW...",
-  "function_id": "f_01HW...",
-  "source": "api",
-  "trigger_kind": "http",
-  "status": "success",
-  "duration_ms": 12,
-  "started_at": "2026-04-14T10:15:00Z",
-  "completed_at": "2026-04-14T10:15:00Z",
-  "request_method": "POST",
-  "request_path": "/f/hello-world",
-  "request_headers": { "content-type": "application/json" },
-  "input": { "name": "world" },
-  "response_status": 200,
-  "response_headers": { "content-type": "application/json" },
-  "response_body_preview": "{\"message\":\"hello world\"}",
-  "logs": ["hello from nvoke"],
-  "error_message": null
+  "invocation": {
+    "id": "a1d4d8d2-9f3b-4a3d-bf1a-2b7c1e0d7c3a",
+    "function_id": "3f8a2a6e-8a7a-4e2e-9b6a-1f2c0a8b7d4e",
+    "source": "api",
+    "trigger_kind": "http",
+    "status": "success",
+    "duration_ms": 12,
+    "started_at": "2026-04-14T10:15:00Z",
+    "completed_at": "2026-04-14T10:15:00Z",
+    "request_method": "POST",
+    "request_path": "/f/hello-world",
+    "request_headers": { "content-type": "application/json" },
+    "input": { "name": "world" },
+    "response_status": 200,
+    "response_headers": { "content-type": "application/json" },
+    "response_body_preview": "{\"message\":\"hello world\"}",
+    "logs": ["hello from nvoke"],
+    "error_message": null
+  }
 }
 ```
 

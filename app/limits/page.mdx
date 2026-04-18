@@ -14,8 +14,9 @@ nvoke.run enforces a small set of hard limits on every function and invocation. 
 | Limit | Value |
 | --- | --- |
 | Response body preview captured per invocation | **4 KB** |
+| Invocation retention | **1 day** |
 
-The full response is still returned to the caller — only the stored preview is truncated.
+The full response is still returned to the caller — only the stored preview is truncated. Invocation records are automatically pruned after 1 day.
 
 ## Functions
 

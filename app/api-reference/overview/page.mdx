@@ -3,7 +3,7 @@
 ## Base URL
 
 ```text
-https://nvoke.run
+https://api.nvoke.run
 ```
 
 All management endpoints live under `/api/*`. Public function endpoints live under `/f/*`.
@@ -34,10 +34,12 @@ Error responses share a shape:
 
 ```json
 {
-  "error": "short machine-readable code",
+  "error": "short_machine_readable_code",
   "message": "human-readable explanation"
 }
 ```
+
+Common error codes: `invalid_request`, `unauthorized`, `forbidden`, `not_found`, `method_not_allowed`, `conflict`, `slug_taken`, `rate_limited`, `quota_exceeded`, `concurrency_exceeded`, `timeout`, `function_error`, `internal_error`.
 
 | Status | Meaning |
 | --- | --- |
